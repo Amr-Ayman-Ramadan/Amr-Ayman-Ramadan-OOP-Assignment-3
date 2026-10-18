@@ -1,31 +1,27 @@
 ﻿namespace Generics;
 
-public class Store<T>
+// The constraint promises the compiler that every T has an Id.
+public class Store<T> where T : IHasId
 {
     private readonly List<T> _items = new();
 
     public void Add(T item) => _items.Add(item);
 
-    // Does NOT compile - see Answers.md (Step 3):
-    // error CS1061: 'T' does not contain a definition for 'Id' and no accessible
-    // extension method 'Id' accepting a first argument of type 'T' could be found
-    //
-    // public T? GetById(int id)
-    // {
-    //     foreach (var item in _items)
-    //     {
-    //         if (item.Id == id)
-    //             return item;
-    //     }
-    //     return default;
-    // }
+    public T? GetById(int id)
+    {
+        foreach (var item in _items)
+        {
+            if (item.Id == id)   // compiles now: T is IHasId
+                return item;
+        }
+        return default;
+    }
 
     public List<T> GetAll() => _items;
 
-    // Remove(int id) needs GetById, so it has the same problem:
-    // public bool Remove(int id)
-    // {
-    //     var item = GetById(id);
-    //     return item is not null && _items.Remove(item);
-    // }
+    public bool Remove(int id)
+    {
+        var item = GetById(id);
+        return item is not null && _items.Remove(item);
+    }
 }

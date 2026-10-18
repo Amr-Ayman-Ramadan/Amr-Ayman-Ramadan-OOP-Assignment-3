@@ -1,6 +1,6 @@
 ﻿namespace Generics;
 
-public class Course
+public class Course : IHasId
 {
     public int Id { get; init; }
     public string Title { get; init; } = "";
