@@ -16,7 +16,15 @@ var processor = new OrderProcessor(new SqlOrderRepository(), new SmtpEmailSender
 processor.Process(1001, "customer@example.com");
 Console.WriteLine();
 
-new UrgentScheduledEmailNotification { SendAt = DateTime.Today.AddHours(18) }
+new Notification(new EmailChannel()) { IsUrgent = true, SendAt = DateTime.Today.AddHours(18) }
     .Send("customer@example.com", "Your order ships tomorrow");
-new UrgentSmsNotification()
+new Notification(new SmsChannel()) { IsUrgent = true }
     .Send("+201000000000", "OTP 4821");
+
+// New channel: normal, urgent, scheduled, and both - no extra classes needed.
+var whatsApp = new WhatsAppChannel();
+new Notification(whatsApp).Send("+201000000000", "Welcome!");
+new Notification(whatsApp) { IsUrgent = true }.Send("+201000000000", "Payment failed");
+new Notification(whatsApp) { SendAt = DateTime.Today.AddHours(9) }.Send("+201000000000", "Class starts at 10");
+new Notification(whatsApp) { IsUrgent = true, SendAt = DateTime.Today.AddHours(20) }
+    .Send("+201000000000", "Assignment due tonight");
