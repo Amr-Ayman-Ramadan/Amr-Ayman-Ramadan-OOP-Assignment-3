@@ -1,27 +1,25 @@
 ﻿namespace Generics;
 
-// The constraint promises the compiler that every T has an Id.
 public class Store<T> where T : IHasId
 {
-    private readonly List<T> _items = new();
+    // Keyed by Id, so GetById is O(1) instead of looping over a list.
+    private readonly Dictionary<int, T> _items = new();
 
-    public void Add(T item) => _items.Add(item);
-
-    public T? GetById(int id)
+    public void Add(T item)
     {
-        foreach (var item in _items)
-        {
-            if (item.Id == id)   // compiles now: T is IHasId
-                return item;
-        }
-        return default;
+        if (_items.ContainsKey(item.Id))
+            throw new InvalidOperationException(
+                $"An item of type {typeof(T).Name} with Id {item.Id} already exists in the store.");
+
+        _items.Add(item.Id, item);
     }
 
-    public List<T> GetAll() => _items;
+    public T? GetById(int id) =>
+        _items.TryGetValue(id, out var item) ? item : default;
 
-    public bool Remove(int id)
-    {
-        var item = GetById(id);
-        return item is not null && _items.Remove(item);
-    }
+    // Read-only: the caller can loop, count and read,
+    // but there is no Add / Remove, so the store cannot be changed from outside.
+    public IReadOnlyCollection<T> GetAll() => _items.Values;
+
+    public bool Remove(int id) => _items.Remove(id);
 }
